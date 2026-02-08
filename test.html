@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <h1>Firebase Test</h1>
+    <button onclick="testFirebase()">Test Connection</button>
+    
+    <script>
+        // Use your actual config here
+        const firebaseConfig = {
+            apiKey: "AIzaSyD...",
+            projectId: "your-project-id",
+            // ... rest of config
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        async function testFirebase() {
+            try {
+                await db.collection('test').add({
+                    test: true,
+                    timestamp: new Date().toISOString()
+                });
+                alert('✅ Firebase connected successfully!');
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
