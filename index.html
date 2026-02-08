@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be My Valentine? 💘</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ffeef2 0%, #ffe6ee 100%);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            position: relative;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        /* Floating hearts background */
+        .heart {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #ff4d6d;
+            transform: rotate(45deg);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .heart:before, .heart:after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #ff4d6d;
+            border-radius: 50%;
+        }
+
+        .heart:before {
+            top: -10px;
+            left: 0;
+        }
+
+        .heart:after {
+            top: 0;
+            left: -10px;
+        }
+
+        /* Different heart colors */
+        .heart.pink { background: #ff4d6d; }
+        .heart.pink:before, .heart.pink:after { background: #ff4d6d; }
+
+        .heart.red { background: #d63384; }
+        .heart.red:before, .heart.red:after { background: #d63384; }
+
+        .heart.light-pink { background: #ff8fa3; }
+        .heart.light-pink:before, .heart.light-pink:after { background: #ff8fa3; }
+
+        .heart.coral { background: #ff758f; }
+        .heart.coral:before, .heart.coral:after { background: #ff758f; }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 3rem;
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(214, 51, 132, 0.15);
+            text-align: center;
+            z-index: 10;
+            max-width: 600px;
+            width: 90%;
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 77, 109, 0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        h1 {
+            color: #d63384;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            height: 50px;
+            margin-top: 1.5rem;
+            position: relative;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            min-width: 150px;
+        }
+
+        #yesBtn {
+            background: linear-gradient(135deg, #ff4d6d, #d63384);
+            color: white;
+            position: relative;
+            overflow: hidden;
+            z-index: 20;
+        }
+
+        #yesBtn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(214, 51, 132, 0.3);
+        }
+
+        #yesBtn:active {
+            transform: scale(1.05);
+        }
+
+        #yesBtn:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.5s;
+        }
+
+        #yesBtn:hover:after {
+            left: 100%;
+        }
+
+        /* The No button - ALWAYS VISIBLE but impossible to click */
+        #noBtn {
+            background-color: #adb5bd;
+            color: white;
+            position: fixed;
+            z-index: 1000;
+            cursor: not-allowed;
+            pointer-events: auto;
+            user-select: none;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            min-width: 150px;
+            transform-origin: center;
+        }
+
+        #noBtn:hover {
+            background-color: #868e96;
+        }
+
+        .hidden {
+            display: none;
+            visibility: hidden;
+        }
+
+        .celebration-img {
+            width: 250px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .success-message {
+            animation: fadeIn 1s ease-out;
+        }
+
+        .success-message h1 {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Animation for floating hearts */
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) rotate(45deg) scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(45deg) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Button bounce animation */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.05); }
+        }
+
+        /* Button wobble animation */
+        @keyframes wobble {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .card {
+                padding: 2rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: 20px;
+                height: auto;
+            }
+            
+            button {
+                width: 200px;
+                min-width: 200px;
+            }
+        }
+
+        /* Instructions text */
+        .instructions {
+            margin-top: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            font-style: italic;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.4;
+        }
+
+        /* Counter for escape attempts */
+        .counter {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        #attemptCount {
+            font-weight: bold;
+            color: #d63384;
+            font-size: 1.2rem;
+        }
+
+        /* Difficulty indicator */
+        .difficulty {
+            margin-top: 5px;
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        #difficultyLevel {
+            font-weight: bold;
+            color: #ff4d6d;
+        }
+    </style>
+</head>
+<body>
+    <div class="card" id="mainCard">
+        <div id="questionContainer">
+            <h1>Will you be my Valentine? 💖</h1>
+            <div class="button-group" >
+                <button id="yesBtn">Yes, Absolutely!</button>
+            </div>
+            <p class="instructions" style="margin-top: 70px;">I Know you can't say No! 😉</p>
+            <p class="counter">Escape attempts: <span id="attemptCount">0</span></p>
+            <p class="difficulty">Current difficulty: <span id="difficultyLevel">Easy</span></p>
+            <img src="hii.gif" alt="celebration" class="celebration-img">
+        </div>
+
+        <div id="successMessage" class="hidden success-message">
+            <h1>YAY! I knew it! 🥰</h1>
+            <p>You just made my day! 💘</p>
+            <img src="yes love.gif" alt="celebration" class="celebration-img">
+            <p style="margin-top: 20px; color: #d63384; font-weight: bold;">Our hearts are now connected forever! 💞</p>
+            <p class="instructions">You tried to click "No" <span id="finalAttemptCount">0</span> times before giving up! 😄</p>
+            <p class="difficulty">Final difficulty reached: <span id="finalDifficulty">Easy</span></p>
+            
+        </div>
+    </div>
+
+    
+    <!-- No button is separate and will ALWAYS be visible -->
+    <button id="noBtn" style="margin-top: -60px;">No</button>
+
+    <script>
+        const noBtn = document.getElementById('noBtn');
+        const yesBtn = document.getElementById('yesBtn');
+        const questionContainer = document.getElementById('questionContainer');
+        const successMessage = document.getElementById('successMessage');
+        const attemptCount = document.getElementById('attemptCount');
+        const finalAttemptCount = document.getElementById('finalAttemptCount');
+        const difficultyLevel = document.getElementById('difficultyLevel');
+        const finalDifficulty = document.getElementById('finalDifficulty');
+        const body = document.body;
+        const card = document.getElementById('mainCard');
+
+        // Track escape attempts and difficulty
+        let escapeAttempts = 0;
+        let accepted = false;
+        let difficulty = 1; // 1: Easy, 2: Medium, 3: Hard
+        let lastPositions = []; // Track last few positions to avoid repetition
+
+        // Fair distance ranges (in pixels)
+        const fairDistances = {
+            easy: { min: 80, max: 150 },
+            medium: { min: 100, max: 200 },
+            hard: { min: 120, max: 250 }
+        };
+
+        // Get current fair distance based on difficulty
+        const getFairDistance = () => {
+            const difficultyKey = ['easy', 'medium', 'hard'][difficulty - 1];
+            const range = fairDistances[difficultyKey];
+            return Math.random() * (range.max - range.min) + range.min;
+        };
+
+        // Update difficulty based on attempts
+        const updateDifficulty = () => {
+            if (escapeAttempts >= 15) {
+                difficulty = 3;
+                difficultyLevel.textContent = "Hard";
+                difficultyLevel.style.color = "#ff4d6d";
+            } else if (escapeAttempts >= 8) {
+                difficulty = 2;
+                difficultyLevel.textContent = "Medium";
+                difficultyLevel.style.color = "#ff8fa3";
+            } else {
+                difficulty = 1;
+                difficultyLevel.textContent = "Easy";
+                difficultyLevel.style.color = "#adb5bd";
+            }
+        };
+
+        // Function to position No button next to Yes button initially
+        const positionNoButtonNextToYes = () => {
+            const yesBtnRect = yesBtn.getBoundingClientRect();
+            const cardRect = card.getBoundingClientRect();
+            
+            
+            
+            noBtn.style.left = `${noBtnX}px`;
+            noBtn.style.top = `${noBtnY}px`;
+            noBtn.style.transform = 'translate(0, 0) rotate(0deg)';
+        };
+
+        // Get a random position that's "fair" - not too far, not too close
+        const getFairRandomPosition = (currentX, currentY) => {
+            const fairDistance = getFairDistance();
+            const angle = Math.random() * Math.PI * 2;
+            
+            // Calculate new position at fair distance
+            let newX = currentX + Math.cos(angle) * fairDistance;
+            let newY = currentY + Math.sin(angle) * fairDistance;
+            
+            // Ensure position stays within viewport with padding
+            const padding = 20;
+            const btnWidth = noBtn.offsetWidth;
+            const btnHeight = noBtn.offsetHeight;
+            const maxX = window.innerWidth - btnWidth - padding;
+            const maxY = window.innerHeight - btnHeight - padding;
+            
+            newX = Math.max(padding, Math.min(maxX, newX));
+            newY = Math.max(padding, Math.min(maxY, newY));
+            
+            // Avoid positions that are too similar to recent ones
+            for (let pos of lastPositions) {
+                const distance = Math.sqrt(Math.pow(pos.x - newX, 2) + Math.pow(pos.y - newY, 2));
+                if (distance < 50) { // If too close to a recent position
+                    // Adjust slightly
+                    newX += (Math.random() * 100 - 50);
+                    newY += (Math.random() * 100 - 50);
+                    
+                    // Re-clamp
+                    newX = Math.max(padding, Math.min(maxX, newX));
+                    newY = Math.max(padding, Math.min(maxY, newY));
+                    break;
+                }
+            }
+            
+            // Store this position for future reference
+            lastPositions.push({ x: newX, y: newY });
+            if (lastPositions.length > 5) {
+                lastPositions.shift();
+            }
+            
+            return { x: newX, y: newY };
+        };
+
+        // Function to make the "No" button escape fairly
+        const escapeFairly = (isClickAttempt = false) => {
+            if (accepted) return;
+            
+            // Increment attempt counter
+            escapeAttempts++;
+            attemptCount.textContent = escapeAttempts;
+            
+            // Update difficulty
+            updateDifficulty();
+            
+            // Get current position
+            const currentX = parseFloat(noBtn.style.left) || 0;
+            const currentY = parseFloat(noBtn.style.top) || 0;
+            
+            // Get a fair random position
+            const newPos = getFairRandomPosition(currentX, currentY);
+            
+            // Add fun animations based on the move
+            if (isClickAttempt) {
+                // For click attempts, add bounce animation
+                noBtn.style.animation = 'bounce 0.5s ease, wobble 0.5s ease';
+            } else {
+                // For proximity, just wobble
+                noBtn.style.animation = 'wobble 0.5s ease';
+            }
+            
+            // Clear animation after it completes
+            setTimeout(() => {
+                noBtn.style.animation = '';
+            }, 500);
+            
+            // Apply new position
+            noBtn.style.left = `${newPos.x}px`;
+            noBtn.style.top = `${newPos.y}px`;
+            
+            // Add slight rotation for visual effect (not too much)
+            const rotation = Math.random() * 15 - 7.5;
+            noBtn.style.transform = `rotate(${rotation}deg)`;
+            
+            // Change button text with increasing sass as attempts increase
+            let texts;
+            if (escapeAttempts < 5) {
+                texts = ["No", "Nope", "Try again", "Missed", "Almost"];
+            } else if (escapeAttempts < 10) {
+                texts = ["Too slow!", "Nice try!", "Haha!", "Nuh-uh!", "Can't catch me!"];
+            } else if (escapeAttempts < 15) {
+                texts = ["You're persistent!", "Still trying?", "Determined!", "Keep going!", "Almost there?"];
+            } else {
+                texts = ["Give up yet?", "You'll never click me!", "I'm too fast!", "Uncatchable!", "Accept defeat!"];
+            }
+            
+            // Change text with probability based on attempts
+            if (Math.random() > 0.7 || isClickAttempt) {
+                const randomIndex = Math.floor(Math.random() * texts.length);
+                noBtn.textContent = texts[randomIndex];
+                
+                // Visual feedback based on difficulty
+                const colors = {
+                    1: '#ff8fa3', // Easy - light pink
+                    2: '#ff758f', // Medium - coral
+                    3: '#ff4d6d'  // Hard - valentine pink
+                };
+                
+                noBtn.style.backgroundColor = colors[difficulty];
+                setTimeout(() => {
+                    if (!accepted) {
+                        noBtn.style.backgroundColor = '#adb5bd';
+                    }
+                }, 400);
+            }
+        };
+
+        // Set up event listeners for No button
+        noBtn.addEventListener('mouseenter', () => {
+            escapeFairly(true);
+        });
+        
+        noBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            escapeFairly(true);
+        });
+
+        noBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            escapeFairly(true);
+        });
+
+        // Also escape when mouse gets fairly close
+        document.addEventListener('mousemove', (e) => {
+            if (accepted) return;
+            
+            const btnRect = noBtn.getBoundingClientRect();
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+            
+            // Calculate distance from mouse to button center
+            const btnCenterX = btnRect.left + btnRect.width/2;
+            const btnCenterY = btnRect.top + btnRect.height/2;
+            const distance = Math.sqrt(
+                Math.pow(mouseX - btnCenterX, 2) +
+                Math.pow(mouseY - btnCenterY, 2)
+            );
+            
+            // Escape when mouse gets fairly close (distance varies with difficulty)
+            const escapeDistance = [100, 80, 60][difficulty - 1]; // Easy: 100px, Medium: 80px, Hard: 60px
+            
+            if (distance < escapeDistance) {
+                // Only escape occasionally to prevent constant movement
+                if (Math.random() > 0.7) {
+                    escapeFairly(false);
+                }
+            }
+        });
+
+        // Success logic - with heart explosion
+        yesBtn.addEventListener('click', () => {
+            accepted = true;
+            
+            // Update final statistics
+            finalAttemptCount.textContent = escapeAttempts;
+            finalDifficulty.textContent = difficultyLevel.textContent;
+            finalDifficulty.style.color = difficultyLevel.style.color;
+            
+            // Trigger heart explosion
+            createHearts();
+            
+            // Show success message
+            questionContainer.classList.add('hidden');
+            successMessage.classList.remove('hidden');
+            
+            // Transform No button into a celebration button
+            noBtn.textContent = "You chose LOVE! 💖";
+            noBtn.style.backgroundColor = '#ff4d6d';
+            noBtn.style.color = 'white';
+            noBtn.style.cursor = 'default';
+            noBtn.style.transform = 'scale(1.1) rotate(0deg)';
+            noBtn.style.boxShadow = '0 0 25px rgba(255, 77, 109, 0.7)';
+            noBtn.style.animation = 'pulse 2s infinite';
+            noBtn.style.transition = 'all 0.5s ease';
+            
+            // Center the button for better visibility
+            const btnWidth = noBtn.offsetWidth;
+            const btnHeight = noBtn.offsetHeight;
+            noBtn.style.left = `${(window.innerWidth - btnWidth) / 2}px`;
+            noBtn.style.top = `${(window.innerHeight - btnHeight) / 2 + 200}px`;
+            
+            // Remove all event listeners
+            const newNoBtn = noBtn.cloneNode(true);
+            noBtn.parentNode.replaceChild(newNoBtn, noBtn);
+            
+            // Continue creating hearts
+            const heartInterval = setInterval(() => {
+                createHearts();
+            }, 2000);
+            
+            // Stop creating hearts after 20 seconds
+            setTimeout(() => {
+                clearInterval(heartInterval);
+            }, 20000);
+        });
+
+        // Function to create heart explosion animation
+        const createHearts = () => {
+            const heartCount = 80 + Math.floor(escapeAttempts / 2); // More hearts with more attempts
+            
+            for (let i = 0; i < heartCount; i++) {
+                const heart = document.createElement('div');
+                heart.classList.add('heart');
+                
+                const colors = ['pink', 'red', 'light-pink', 'coral'];
+                const colorClass = colors[Math.floor(Math.random() * colors.length)];
+                heart.classList.add(colorClass);
+                
+                const size = Math.random() * 20 + 10;
+                heart.style.width = `${size}px`;
+                heart.style.height = `${size}px`;
+                
+                const startX = Math.random() * window.innerWidth;
+                const startY = window.innerHeight + 50;
+                
+                heart.style.left = `${startX}px`;
+                heart.style.top = `${startY}px`;
+                
+                const duration = Math.random() * 3 + 2;
+                heart.style.animation = `floatUp ${duration}s linear forwards`;
+                
+                body.appendChild(heart);
+                
+                setTimeout(() => {
+                    if (heart.parentNode) {
+                        heart.parentNode.removeChild(heart);
+                    }
+                }, duration * 1000);
+            }
+        };
+
+        // Initialize
+        window.addEventListener('load', () => {
+            // Position No button next to Yes button
+            positionNoButtonNextToYes();
+            
+            // Make absolutely sure No button is visible
+            noBtn.style.display = 'block';
+            noBtn.style.visibility = 'visible';
+            noBtn.style.opacity = '1';
+            
+            // Create initial background hearts
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.classList.add('heart', 'light-pink');
+                    
+                    const size = Math.random() * 15 + 8;
+                    heart.style.width = `${size}px`;
+                    heart.style.height = `${size}px`;
+                    
+                    const startX = Math.random() * window.innerWidth;
+                    const startY = window.innerHeight + 30;
+                    
+                    heart.style.left = `${startX}px`;
+                    heart.style.top = `${startY}px`;
+                    
+                    const duration = Math.random() * 8 + 10;
+                    heart.style.animation = `floatUp ${duration}s linear forwards`;
+                    heart.style.opacity = '0.7';
+                    
+                    body.appendChild(heart);
+                    
+                    setTimeout(() => {
+                        if (heart.parentNode) {
+                            heart.parentNode.removeChild(heart);
+                        }
+                    }, duration * 1000);
+                }, i * 1000);
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (!accepted) {
+                const btnRect = noBtn.getBoundingClientRect();
+                const padding = 20;
+                const maxX = window.innerWidth - btnRect.width - padding;
+                const maxY = window.innerHeight - btnRect.height - padding;
+                
+                // If button is outside viewport, bring it back to a fair position
+                if (btnRect.left < padding || btnRect.right > window.innerWidth - padding || 
+                    btnRect.top < padding || btnRect.bottom > window.innerHeight - padding) {
+                    
+                    const newX = Math.max(padding, Math.min(maxX, btnRect.left));
+                    const newY = Math.max(padding, Math.min(maxY, btnRect.top));
+                    
+                    noBtn.style.left = `${newX}px`;
+                    noBtn.style.top = `${newY}px`;
+                }
+            }
+        });
+
+        // Add a little bounce animation when page loads
+        setTimeout(() => {
+            if (!accepted) {
+                noBtn.style.animation = 'bounce 1s ease 2';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
