@@ -382,46 +382,60 @@
 
         // Get a random position that's "fair" - not too far, not too close
         const getFairRandomPosition = (currentX, currentY) => {
-            const fairDistance = getFairDistance();
-            const angle = Math.random() * Math.PI * 2;
-            
-            // Calculate new position at fair distance
-            let newX = currentX + Math.cos(angle) * fairDistance;
-            let newY = currentY + Math.sin(angle) * fairDistance;
-            
-            // Ensure position stays within viewport with padding
-            const padding = 20;
-            const btnWidth = noBtn.offsetWidth;
-            const btnHeight = noBtn.offsetHeight;
-            const maxX = window.innerWidth - btnWidth - padding;
-            const maxY = window.innerHeight - btnHeight - padding;
-            
-            newX = Math.max(padding, Math.min(maxX, newX));
-            newY = Math.max(padding, Math.min(maxY, newY));
-            
-            // Avoid positions that are too similar to recent ones
-            for (let pos of lastPositions) {
-                const distance = Math.sqrt(Math.pow(pos.x - newX, 2) + Math.pow(pos.y - newY, 2));
-                if (distance < 50) { // If too close to a recent position
-                    // Adjust slightly
-                    newX += (Math.random() * 100 - 50);
-                    newY += (Math.random() * 100 - 50);
-                    
-                    // Re-clamp
-                    newX = Math.max(padding, Math.min(maxX, newX));
-                    newY = Math.max(padding, Math.min(maxY, newY));
-                    break;
-                }
-            }
-            
-            // Store this position for future reference
-            lastPositions.push({ x: newX, y: newY });
-            if (lastPositions.length > 5) {
-                lastPositions.shift();
-            }
-            
-            return { x: newX, y: newY };
-        };
+    const fairDistance = getFairDistance();
+    const angle = Math.random() * Math.PI * 2;
+    
+    // Calculate new position at fair distance
+    let newX = currentX + Math.cos(angle) * fairDistance;
+    let newY = currentY + Math.sin(angle) * fairDistance;
+    
+    // Get button dimensions
+    const btnWidth = noBtn.offsetWidth;
+    const btnHeight = noBtn.offsetHeight;
+    
+    // Get screen dimensions
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    
+    // Define safe margins
+    const margin = 20;
+    
+    // Calculate safe bounds
+    const maxX = screenWidth - btnWidth - margin;
+    const maxY = screenHeight - btnHeight - margin;
+    const minX = margin;
+    const minY = margin;
+    
+    // Simple boundary check and correction
+    if (newX < minX) {
+        newX = minX + Math.random() * 50; // Move to left edge + random offset
+    }
+    if (newX > maxX) {
+        newX = maxX - Math.random() * 50; // Move to right edge - random offset
+    }
+    if (newY < minY) {
+        newY = minY + Math.random() * 50; // Move to top edge + random offset
+    }
+    if (newY > maxY) {
+        newY = maxY - Math.random() * 50; // Move to bottom edge - random offset
+    }
+    
+    // Ensure minimum movement
+    const distanceMoved = Math.sqrt(Math.pow(newX - currentX, 2) + Math.pow(newY - currentY, 2));
+    if (distanceMoved < 30) {
+        // Pick a completely new random position within bounds
+        newX = minX + Math.random() * (maxX - minX);
+        newY = minY + Math.random() * (maxY - minY);
+    }
+    
+    // Store position history
+    lastPositions.push({ x: newX, y: newY });
+    if (lastPositions.length > 5) {
+        lastPositions.shift();
+    }
+    
+    return { x: newX, y: newY };
+};
 
         // Function to make the "No" button escape fairly
         const escapeFairly = (isClickAttempt = false) => {
